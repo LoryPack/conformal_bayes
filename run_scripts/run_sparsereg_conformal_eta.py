@@ -53,15 +53,15 @@ def run_sparsereg_conformal(dataset, misspec=False, eta: float = 1):
 
         @jit  # normal loglik from posterior samples
         def normal_loglikelihood(y, x):
-            return eta * norm.logpdf(y, loc=jnp.dot(beta_post[j], x.transpose()) + intercept_post[j],
+            return norm.logpdf(y, loc=jnp.dot(beta_post[j], x.transpose()) + intercept_post[j],
                                        scale=sigma_post[j])  # compute likelihood samples
 
-        logp_samp_n = normal_loglikelihood(y, x)
+        logp_samp_n = normal_loglikelihood(y, x) * eta
         logwjk = normal_loglikelihood(y_plot.reshape(-1, 1, 1), x_test)
         logwjk_test = normal_loglikelihood(y_test, x_test).reshape(1, -1, n_test)
 
         for i in (range(n_test)):
-            region_cb[j, i] = cb.compute_cb_region_IS(alpha, logp_samp_n, logwjk[:, :, i])
+            region_cb[j, i] = cb.compute_cb_region_IS(alpha, logp_samp_n, logwjk[:, :, i], eta)
             coverage_cb[j, i] = region_cb[j, i, np.argmin(np.abs(y_test[i] - y_plot))]  # grid coverage
             length_cb[j, i] = np.sum(region_cb[j, i]) * dy
         end = time.time()
@@ -70,7 +70,7 @@ def run_sparsereg_conformal(dataset, misspec=False, eta: float = 1):
         # compute exact coverage to avoid grid effects
         for i in (range(n_test)):
             coverage_cb_exact[j, i] = cb.compute_cb_region_IS(alpha, logp_samp_n,
-                                                              logwjk_test[:, :, i])  # exact coverage
+                                                              logwjk_test[:, :, i], eta)  # exact coverage
 
     # #Save regions (need to update)
     if eta != 1:

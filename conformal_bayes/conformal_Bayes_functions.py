@@ -10,7 +10,7 @@ from jax.ops import index_update
 ## CONFORMAL FROM MCMC SAMPLES ##
 ### JAX IMPLEMENTATION
 @jit #compute rank (unnormalized by n+1)
-def compute_rank_IS(logp_samp_n,logwjk):
+def compute_rank_IS(logp_samp_n,logwjk,eta):
     n= jnp.shape(logp_samp_n)[1] #logp_samp_n is B x n
     n_plot = jnp.shape(logwjk)[0]
     rank_cp = jnp.zeros(n_plot)
@@ -21,7 +21,7 @@ def compute_rank_IS(logp_samp_n,logwjk):
     
     #compute predictives for y_i,x_i and y_new,x_n+1
     p_cp = jnp.dot(wjk/Zjk, jnp.exp(logp_samp_n))
-    p_new = jnp.sum(wjk**2,axis = 1).reshape(-1,1)/Zjk
+    p_new = jnp.sum(wjk**(2*eta),axis = 1).reshape(-1,1)/Zjk
 
     #compute nonconformity score and sort
     pred_tot = jnp.concatenate((p_cp,p_new),axis = 1)
@@ -31,9 +31,9 @@ def compute_rank_IS(logp_samp_n,logwjk):
 
 #compute region of grid which is in confidence set
 @jit
-def compute_cb_region_IS(alpha,logp_samp_n,logwjk): #assumes they are connected
+def compute_cb_region_IS(alpha,logp_samp_n,logwjk,eta): #assumes they are connected
     n= jnp.shape(logp_samp_n)[1]#logp_samp_n is B x n
-    rank_cp = compute_rank_IS(logp_samp_n,logwjk)
+    rank_cp = compute_rank_IS(logp_samp_n,logwjk,eta)
     region_true =rank_cp> alpha*(n+1)
     return region_true
 ## ##
