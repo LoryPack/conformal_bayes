@@ -20,8 +20,12 @@ def compute_rank_IS(logp_samp_n,logwjk,eta):
     Zjk = jnp.sum(wjk,axis = 1).reshape(-1,1)
     
     #compute predictives for y_i,x_i and y_new,x_n+1
-    p_cp = jnp.dot(wjk/Zjk, jnp.exp(logp_samp_n))
-    p_new = jnp.sum(wjk**(2*eta),axis = 1).reshape(-1,1)/Zjk
+    p_cp = jnp.dot(wjk/Zjk, jnp.exp(logp_samp_n * eta))
+    # p_new = jnp.sum(wjk**2,axis = 1).reshape(-1,1)/Zjk  # old version with no eta
+    p_new = jnp.sum(wjk**(1 + eta),axis = 1).reshape(-1,1)/Zjk
+    # here they are computing the posterior predictive for the new point. The w is the likelihood itself, so this is
+    # why they ahd w**2. However we introduce eta in the likelihood in the predictive integral, so we should have
+    # w**(1+eta)
 
     #compute nonconformity score and sort
     pred_tot = jnp.concatenate((p_cp,p_new),axis = 1)

@@ -54,9 +54,10 @@ def run_sparsereg_conformal(dataset, misspec=False, eta: float = 1):
         @jit  # normal loglik from posterior samples
         def normal_loglikelihood(y, x):
             return norm.logpdf(y, loc=jnp.dot(beta_post[j], x.transpose()) + intercept_post[j],
-                                       scale=sigma_post[j])  # compute likelihood samples
+                               scale=sigma_post[j])  # compute likelihood samples
 
-        logp_samp_n = normal_loglikelihood(y, x) * eta
+        print(eta)
+        logp_samp_n = normal_loglikelihood(y, x)
         logwjk = normal_loglikelihood(y_plot.reshape(-1, 1, 1), x_test)
         logwjk_test = normal_loglikelihood(y_test, x_test).reshape(1, -1, n_test)
 
@@ -83,10 +84,16 @@ def run_sparsereg_conformal(dataset, misspec=False, eta: float = 1):
 
     np.save("results/length_cb_sparsereg_{}".format(suffix), length_cb)
     np.save("results/times_cb_sparsereg_{}".format(suffix), times_cb)
-    return np.mean(length_cb)
+    return np.mean(length_cb), np.mean(coverage_cb), np.mean(coverage_cb_exact)
 
 
 if __name__ == "__main__":
-    for eta in [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]:
-        mean_length = run_sparsereg_conformal('diabetes', True, eta=eta)
-        print("eta: {}; Mean length: {}".format(eta, mean_length))
+    misspec_list = [True, False]
+    # misspec_list = [True]
+    eta_list = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.8, 1.9, 2.0]
+    for misspec in misspec_list:
+        for eta in eta_list:
+            mean_length, mean_coverage, mean_coverage_exact = run_sparsereg_conformal('diabetes', misspec, eta=eta)
+            print("eta: {}; Mean length: {}; Mean coverage: {}; Mean coverage exact: {}".format(eta, mean_length,
+                                                                                                mean_coverage,
+                                                                                                mean_coverage_exact))
