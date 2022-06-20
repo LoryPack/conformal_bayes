@@ -73,7 +73,7 @@ def run_sparsereg_conformal(dataset, misspec=False, eta: float = 1):
             coverage_cb_exact[j, i] = cb.compute_cb_region_IS(alpha, logp_samp_n,
                                                               logwjk_test[:, :, i], eta)  # exact coverage
 
-    # #Save regions (need to update)
+    #Save regions (need to update)
     if eta != 1:
         suffix = suffix + "_eta_" + str(eta)
 

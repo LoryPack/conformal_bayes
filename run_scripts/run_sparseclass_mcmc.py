@@ -54,3 +54,6 @@ def run_sparseclass_mcmc(dataset):
     np.save("samples/intercept_post_sparseclass_{}".format(dataset),intercept_post)
     np.save("samples/b_post_sparseclass_{}".format(dataset),b_post)
     np.save("samples/times_sparseclass_{}".format(dataset),times)
+
+if __name__ == "__main__":
+    run_sparseclass_mcmc('breast')
