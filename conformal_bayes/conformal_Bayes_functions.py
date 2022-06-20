@@ -10,7 +10,7 @@ from jax.ops import index_update
 ## CONFORMAL FROM MCMC SAMPLES ##
 ### JAX IMPLEMENTATION
 @jit #compute rank (unnormalized by n+1)
-def compute_rank_IS(logp_samp_n,logwjk,eta):
+def compute_rank_IS(logp_samp_n,logwjk,eta=1):
     n= jnp.shape(logp_samp_n)[1] #logp_samp_n is B x n
     n_plot = jnp.shape(logwjk)[0]
     rank_cp = jnp.zeros(n_plot)
@@ -35,7 +35,7 @@ def compute_rank_IS(logp_samp_n,logwjk,eta):
 
 #compute region of grid which is in confidence set
 @jit
-def compute_cb_region_IS(alpha,logp_samp_n,logwjk,eta): #assumes they are connected
+def compute_cb_region_IS(alpha,logp_samp_n,logwjk,eta=1): #assumes they are connected
     n= jnp.shape(logp_samp_n)[1]#logp_samp_n is B x n
     rank_cp = compute_rank_IS(logp_samp_n,logwjk,eta)
     region_true =rank_cp> alpha*(n+1)
